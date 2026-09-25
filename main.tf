@@ -12,3 +12,19 @@ module "network" {
   rt_public_vp_name  = var.rt_public_vp_name
   rt_private_vp_name = var.rt_private_vp_name
 }
+
+module "security" {
+  source     = "./modules/security"
+  vpc_id     = module.network.vpc_id
+  admin_cidr = var.admin_cidr
+}
+
+module "compute" {
+  source        = "./modules/compute"
+  public_subnet = module.network.public_subnets[0]
+  sg_id         = module.security.sg_id
+  instance_type = var.instance_type
+  key_name      = var.key_name
+}
+
+output "ec2_ip" { value = module.compute.ec2_ip }

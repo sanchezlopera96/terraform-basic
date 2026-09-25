@@ -18,3 +18,7 @@ override.tf.json
 # CLI configuration files
 .terraformrc
 terraform.rc
+
+# Private keys
+*.pem
+*.ppk

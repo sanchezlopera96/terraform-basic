@@ -56,3 +56,21 @@ variable "rt_public_vp_name" {
 variable "rt_private_vp_name" {
   default = "RT_ITMLab_VP_Private"
 }
+
+# Tipo de instancia EC2
+variable "instance_type" {
+  description = "Tipo de instancia EC2"
+  type        = string
+}
+
+# Llave SSH
+variable "key_name" {
+  description = "Nombre de la llave SSH"
+  type        = string
+}
+
+# CIDR con acceso SSH (usar TF_VAR_admin_cidr, no ponerlo en .tfvars)
+variable "admin_cidr" {
+  description = "CIDR con acceso a SSH (22)"
+  type        = string
+}
