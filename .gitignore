@@ -22,3 +22,6 @@ terraform.rc
 # Private keys
 *.pem
 *.ppk
+
+# Variables locales con datos sensibles (admin_cidr, key_name, etc.)
+*.auto.tfvars

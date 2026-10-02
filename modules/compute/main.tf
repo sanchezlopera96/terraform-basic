@@ -17,7 +17,6 @@ resource "aws_instance" "ec2" {
               dnf install -y docker git httpd
               systemctl enable --now docker
               usermod -aG docker ec2-user
-              sed -i 's/^Listen 80$/Listen 8080/' /etc/httpd/conf/httpd.conf
               echo "<h1>ITMLab $(hostname -f)</h1>" > /var/www/html/index.html
               systemctl enable --now httpd
               EOF
