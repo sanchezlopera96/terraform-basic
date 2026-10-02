@@ -5,6 +5,7 @@ resource "aws_instance" "ec2" {
   vpc_security_group_ids      = [var.sg_id]
   associate_public_ip_address = true
   key_name                    = var.key_name
+  user_data_replace_on_change = true
   root_block_device {
     volume_size           = 20
     volume_type           = "gp3"
@@ -24,3 +25,4 @@ resource "aws_instance" "ec2" {
 }
 
 output "ec2_ip" { value = aws_instance.ec2.public_ip }
+output "instance_id" { value = aws_instance.ec2.id }

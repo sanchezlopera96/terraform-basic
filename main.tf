@@ -27,4 +27,13 @@ module "compute" {
   key_name      = var.key_name
 }
 
+module "load_balancer" {
+  source             = "./modules/load_balancer"
+  vpc_id             = module.network.vpc_id
+  public_subnets     = module.network.public_subnets
+  worker_instance_id = module.compute.instance_id
+  alb_sg_id          = module.security.alb_sg_id
+}
+
 output "ec2_ip" { value = module.compute.ec2_ip }
+output "alb_dns" { value = module.load_balancer.alb_dns }
