@@ -8,9 +8,9 @@ variable "public_subnets" {
   type        = list(string)
 }
 
-variable "worker_instance_id" {
-  description = "ID de la instancia Worker para el Target Group"
-  type        = string
+variable "worker_instance_ids" {
+  description = "IDs de las instancias Worker para el Target Group"
+  type        = list(string)
 }
 
 variable "alb_sg_id" {

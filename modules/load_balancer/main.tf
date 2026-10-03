@@ -29,8 +29,9 @@ resource "aws_lb_listener" "http" {
 }
 
 resource "aws_lb_target_group_attachment" "worker_attach" {
+  count            = length(var.worker_instance_ids)
   target_group_arn = aws_lb_target_group.tg.arn
-  target_id        = var.worker_instance_id
+  target_id        = var.worker_instance_ids[count.index]
 }
 
 output "alb_dns" { value = aws_lb.main.dns_name }

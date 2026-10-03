@@ -1,7 +1,8 @@
 resource "aws_instance" "ec2" {
+  count                       = length(var.public_subnets)
   ami                         = "ami-0fef201115eefe936"
   instance_type               = var.instance_type
-  subnet_id                   = var.public_subnet
+  subnet_id                   = var.public_subnets[count.index]
   vpc_security_group_ids      = [var.sg_id]
   associate_public_ip_address = true
   key_name                    = var.key_name
@@ -18,11 +19,13 @@ resource "aws_instance" "ec2" {
               dnf install -y docker git httpd
               systemctl enable --now docker
               usermod -aG docker ec2-user
-              echo "<h1>ITMLab $(hostname -f)</h1>" > /var/www/html/index.html
+              TOKEN=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
+              AZ=$(curl -s -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/placement/availability-zone)
+              echo "<h1>ITMLab $(hostname -f) - AZ: $AZ</h1>" > /var/www/html/index.html
               systemctl enable --now httpd
               EOF
-  tags      = { Name = "DEV-${terraform.workspace}" }
+  tags      = { Name = "DEV-${terraform.workspace}-${count.index}" }
 }
 
-output "ec2_ip" { value = aws_instance.ec2.public_ip }
-output "instance_id" { value = aws_instance.ec2.id }
+output "ec2_ips" { value = aws_instance.ec2[*].public_ip }
+output "instance_ids" { value = aws_instance.ec2[*].id }

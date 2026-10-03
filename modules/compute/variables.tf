@@ -1,6 +1,6 @@
-variable "public_subnet" {
-  description = "Subred pública para la instancia"
-  type        = string
+variable "public_subnets" {
+  description = "Subredes públicas, una instancia por cada una"
+  type        = list(string)
 }
 
 variable "sg_id" {
