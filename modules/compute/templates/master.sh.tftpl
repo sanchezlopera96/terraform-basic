@@ -26,6 +26,36 @@ spec:
       role: worker
 YAML
 
+# EFS CSI driver: el controller corre en el worker (no tolera el taint del master)
+cat > /var/lib/rancher/k3s/server/manifests/aws-efs-csi-driver.yaml <<'YAML'
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: aws-efs-csi-driver
+  namespace: kube-system
+spec:
+  repo: https://kubernetes-sigs.github.io/aws-efs-csi-driver
+  chart: aws-efs-csi-driver
+  version: "${efs_chart}"
+  targetNamespace: kube-system
+  valuesContent: |-
+    controller:
+      replicaCount: 1
+YAML
+
+# StorageClass dinámico: cada PVC crea su propio access point en el EFS
+cat > /var/lib/rancher/k3s/server/manifests/efs-storageclass.yaml <<'YAML'
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: efs-sc
+provisioner: efs.csi.aws.com
+parameters:
+  provisioningMode: efs-ap
+  fileSystemId: "${efs_id}"
+  directoryPerms: "700"
+YAML
+
 # AL2023 no es compatible con el RPM k3s-selinux (SELinux viene en modo permissive)
 export INSTALL_K3S_VERSION="${k3s_version}"
 export INSTALL_K3S_SKIP_SELINUX_RPM=true
