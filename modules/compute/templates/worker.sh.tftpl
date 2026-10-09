@@ -1,0 +1,12 @@
+#!/bin/bash
+set -uo pipefail
+
+# Reintenta hasta que la salida a internet por el NAT Gateway esté lista
+until curl -sfL https://get.k3s.io -o /tmp/k3s-install.sh; do sleep 10; done
+
+export INSTALL_K3S_VERSION="${k3s_version}"
+export INSTALL_K3S_SKIP_SELINUX_RPM=true
+export K3S_URL="https://${master_ip}:6443"
+export K3S_TOKEN="${k3s_token}"
+sh /tmp/k3s-install.sh agent \
+  --node-label role=worker

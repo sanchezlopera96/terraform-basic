@@ -1,0 +1,36 @@
+#!/bin/bash
+set -uo pipefail
+
+# Consulta la metadata de la instancia (IMDSv2)
+imds() {
+  TOKEN=$(curl -sf -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 60")
+  curl -sf -H "X-aws-ec2-metadata-token: $TOKEN" "http://169.254.169.254/latest/meta-data/$1"
+}
+
+# Espera a que la EIP quede asociada: al cambiar la IP pública se cortaría la descarga
+until [ "$(imds public-ipv4)" = "${public_ip}" ]; do sleep 5; done
+
+until curl -sfL https://get.k3s.io -o /tmp/k3s-install.sh; do sleep 10; done
+
+# Traefik en el worker: el ALB solo envía tráfico a ese nodo (k3s aplica este manifest al arrancar)
+mkdir -p /var/lib/rancher/k3s/server/manifests
+cat > /var/lib/rancher/k3s/server/manifests/traefik-config.yaml <<'YAML'
+apiVersion: helm.cattle.io/v1
+kind: HelmChartConfig
+metadata:
+  name: traefik
+  namespace: kube-system
+spec:
+  valuesContent: |-
+    nodeSelector:
+      role: worker
+YAML
+
+# AL2023 no es compatible con el RPM k3s-selinux (SELinux viene en modo permissive)
+export INSTALL_K3S_VERSION="${k3s_version}"
+export INSTALL_K3S_SKIP_SELINUX_RPM=true
+export K3S_TOKEN="${k3s_token}"
+sh /tmp/k3s-install.sh server \
+  --tls-san "${public_ip}" \
+  --write-kubeconfig-mode 644 \
+  --node-taint node-role.kubernetes.io/control-plane:NoSchedule

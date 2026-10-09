@@ -12,9 +12,11 @@ resource "aws_lb_target_group" "tg" {
   port     = 80
   protocol = "HTTP"
   vpc_id   = var.vpc_id
+  # Traefik responde 404 en "/" mientras no exista un Ingress; se acepta para que el target quede healthy
   health_check {
     path     = "/"
     interval = 30
+    matcher  = "200-404"
   }
 }
 

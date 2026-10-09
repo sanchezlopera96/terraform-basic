@@ -57,10 +57,23 @@ variable "rt_private_vp_name" {
   default = "RT_ITMLab_VP_Private"
 }
 
-# Tipo de instancia EC2
-variable "instance_type" {
-  description = "Tipo de instancia EC2"
+# Tipo de instancia del master (Control Plane)
+variable "master_instance_type" {
+  description = "Tipo de instancia del master"
   type        = string
+}
+
+# Tipo de instancia del worker
+variable "worker_instance_type" {
+  description = "Tipo de instancia del worker"
+  type        = string
+}
+
+# Versión de k3s (canal stable: https://update.k3s.io/v1-release/channels/stable)
+variable "k3s_version" {
+  description = "Versión de k3s a instalar"
+  type        = string
+  default     = "v1.36.5+k3s1"
 }
 
 # Llave SSH

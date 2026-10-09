@@ -17,4 +17,5 @@ rt_public_vp_name  = "RT_ITMLab_VP_Public"
 rt_private_vp_name = "RT_ITMLab_VP_Private"
 
 # Compute Variables
-instance_type = "t3.small"
+master_instance_type = "t3.medium"
+worker_instance_type = "t3.large"

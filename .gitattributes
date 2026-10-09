@@ -1,0 +1,3 @@
+# Los scripts de user_data deben llegar a Linux con LF
+*.tftpl text eol=lf
+*.sh    text eol=lf
