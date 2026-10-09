@@ -26,6 +26,7 @@ resource "aws_instance" "master" {
   vpc_security_group_ids      = [var.master_sg_id]
   associate_public_ip_address = true
   key_name                    = var.key_name
+  iam_instance_profile        = var.instance_profile
   user_data_replace_on_change = true
 
   metadata_options {
@@ -42,6 +43,8 @@ resource "aws_instance" "master" {
     k3s_version = var.k3s_version
     k3s_token   = random_password.k3s_token.result
     public_ip   = aws_eip.master.public_ip
+    efs_id      = var.efs_id
+    efs_chart   = var.efs_csi_chart_version
   })
   tags = { Name = "Master-${terraform.workspace}" }
 
@@ -62,6 +65,7 @@ resource "aws_instance" "worker" {
   vpc_security_group_ids      = [var.worker_sg_id]
   associate_public_ip_address = false
   key_name                    = var.key_name
+  iam_instance_profile        = var.instance_profile
   user_data_replace_on_change = true
   metadata_options {
     http_tokens                 = "required"

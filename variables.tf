@@ -76,6 +76,21 @@ variable "k3s_version" {
   default     = "v1.36.5+k3s1"
 }
 
+# Instance profile de los nodos. AWS Academy no permite crear roles IAM,
+# así que se usa el que trae el laboratorio (LabRole)
+variable "instance_profile" {
+  description = "Instance profile IAM existente para los nodos k3s"
+  type        = string
+  default     = "LabInstanceProfile"
+}
+
+# Versión del chart del EFS CSI driver (https://github.com/kubernetes-sigs/aws-efs-csi-driver/releases)
+variable "efs_csi_chart_version" {
+  description = "Versión del chart Helm aws-efs-csi-driver"
+  type        = string
+  default     = "4.5.1"
+}
+
 # Llave SSH
 variable "key_name" {
   description = "Nombre de la llave SSH"

@@ -19,16 +19,25 @@ module "security" {
   admin_cidr = var.admin_cidr
 }
 
+module "storage" {
+  source          = "./modules/storage"
+  private_subnets = slice(module.network.private_subnets, 0, 2)
+  efs_sg_id       = module.security.efs_sg_id
+}
+
 module "compute" {
-  source               = "./modules/compute"
-  public_subnet        = module.network.public_subnets[0]
-  private_subnet       = module.network.private_subnets[0]
-  master_sg_id         = module.security.master_sg_id
-  worker_sg_id         = module.security.worker_sg_id
-  master_instance_type = var.master_instance_type
-  worker_instance_type = var.worker_instance_type
-  key_name             = var.key_name
-  k3s_version          = var.k3s_version
+  source                = "./modules/compute"
+  public_subnet         = module.network.public_subnets[0]
+  private_subnet        = module.network.private_subnets[0]
+  master_sg_id          = module.security.master_sg_id
+  worker_sg_id          = module.security.worker_sg_id
+  master_instance_type  = var.master_instance_type
+  worker_instance_type  = var.worker_instance_type
+  key_name              = var.key_name
+  k3s_version           = var.k3s_version
+  instance_profile      = var.instance_profile
+  efs_id                = module.storage.efs_id
+  efs_csi_chart_version = var.efs_csi_chart_version
 }
 
 module "load_balancer" {
@@ -43,3 +52,4 @@ output "master_public_ip" { value = module.compute.master_public_ip }
 output "master_private_ip" { value = module.compute.master_private_ip }
 output "worker_private_ip" { value = module.compute.worker_private_ip }
 output "alb_dns" { value = module.load_balancer.alb_dns }
+output "efs_id" { value = module.storage.efs_id }

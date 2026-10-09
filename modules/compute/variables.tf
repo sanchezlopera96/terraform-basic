@@ -33,6 +33,21 @@ variable "key_name" {
   type        = string
 }
 
+variable "instance_profile" {
+  description = "Instance profile IAM de los nodos (permisos del EFS CSI driver)"
+  type        = string
+}
+
+variable "efs_id" {
+  description = "ID del EFS para el StorageClass efs-sc"
+  type        = string
+}
+
+variable "efs_csi_chart_version" {
+  description = "Versión del chart Helm aws-efs-csi-driver"
+  type        = string
+}
+
 variable "k3s_version" {
   description = "Versión de k3s a instalar"
   type        = string

@@ -130,6 +130,34 @@ resource "aws_vpc_security_group_egress_rule" "worker_all" {
 
 output "worker_sg_id" { value = aws_security_group.worker.id }
 
+############### EFS ###############
+
+resource "aws_security_group" "efs" {
+  name   = "SG-EFS-${terraform.workspace}"
+  vpc_id = var.vpc_id
+  tags   = { Name = "SG-EFS-${terraform.workspace}" }
+}
+
+resource "aws_vpc_security_group_ingress_rule" "efs_nfs_master" {
+  security_group_id            = aws_security_group.efs.id
+  description                  = "NFS desde el master"
+  ip_protocol                  = "tcp"
+  from_port                    = 2049
+  to_port                      = 2049
+  referenced_security_group_id = aws_security_group.master.id
+}
+
+resource "aws_vpc_security_group_ingress_rule" "efs_nfs_worker" {
+  security_group_id            = aws_security_group.efs.id
+  description                  = "NFS desde workers"
+  ip_protocol                  = "tcp"
+  from_port                    = 2049
+  to_port                      = 2049
+  referenced_security_group_id = aws_security_group.worker.id
+}
+
+output "efs_sg_id" { value = aws_security_group.efs.id }
+
 ############### ALB ###############
 
 resource "aws_security_group" "alb" {
