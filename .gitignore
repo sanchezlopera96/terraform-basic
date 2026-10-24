@@ -25,3 +25,6 @@ terraform.rc
 
 # Variables locales con datos sensibles (admin_cidr, key_name, etc.)
 *.auto.tfvars
+
+# Secret real de Kubernetes (solo se versiona la plantilla api-secret.yaml.example)
+k8s/api-secret.yaml

@@ -91,6 +91,44 @@ variable "efs_csi_chart_version" {
   default     = "4.5.1"
 }
 
+# Base de datos (RDS PostgreSQL)
+variable "db_engine_version" {
+  description = "Versión de PostgreSQL"
+  type        = string
+  default     = "17"
+}
+
+variable "db_instance_class" {
+  description = "Tipo de instancia de la base de datos"
+  type        = string
+  default     = "db.t3.micro"
+}
+
+variable "db_allocated_storage" {
+  description = "Almacenamiento de la base de datos en GB"
+  type        = number
+  default     = 20
+}
+
+variable "db_name" {
+  description = "Nombre de la base de datos inicial"
+  type        = string
+  default     = "eventosvivos"
+}
+
+variable "db_username" {
+  description = "Usuario maestro de la base de datos"
+  type        = string
+  default     = "admin_user"
+}
+
+# Contraseña de la base (usar TF_VAR_db_password, no ponerla en .tfvars)
+variable "db_password" {
+  description = "Contraseña del usuario maestro de la base de datos"
+  type        = string
+  sensitive   = true
+}
+
 # Llave SSH
 variable "key_name" {
   description = "Nombre de la llave SSH"

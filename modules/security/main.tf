@@ -158,6 +158,34 @@ resource "aws_vpc_security_group_ingress_rule" "efs_nfs_worker" {
 
 output "efs_sg_id" { value = aws_security_group.efs.id }
 
+############### RDS ###############
+
+resource "aws_security_group" "rds" {
+  name   = "SG-RDS-${terraform.workspace}"
+  vpc_id = var.vpc_id
+  tags   = { Name = "SG-RDS-${terraform.workspace}" }
+}
+
+resource "aws_vpc_security_group_ingress_rule" "rds_pg_worker" {
+  security_group_id            = aws_security_group.rds.id
+  description                  = "PostgreSQL desde workers (pods)"
+  ip_protocol                  = "tcp"
+  from_port                    = 5432
+  to_port                      = 5432
+  referenced_security_group_id = aws_security_group.worker.id
+}
+
+resource "aws_vpc_security_group_ingress_rule" "rds_pg_master" {
+  security_group_id            = aws_security_group.rds.id
+  description                  = "PostgreSQL desde el master (tunel SSH para admin)"
+  ip_protocol                  = "tcp"
+  from_port                    = 5432
+  to_port                      = 5432
+  referenced_security_group_id = aws_security_group.master.id
+}
+
+output "rds_sg_id" { value = aws_security_group.rds.id }
+
 ############### ALB ###############
 
 resource "aws_security_group" "alb" {

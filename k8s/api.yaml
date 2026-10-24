@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eventosvivos-api
+  namespace: eventosvivos
+  labels: { app: eventosvivos-api }
+spec:
+  # Una sola réplica: la API aplica las migraciones al arrancar.
+  replicas: 1
+  selector:
+    matchLabels: { app: eventosvivos-api }
+  template:
+    metadata:
+      labels: { app: eventosvivos-api }
+    spec:
+      containers:
+        - name: api
+          image: ghcr.io/sanchezlopera96/eventosvivos-api:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - secretRef:
+                name: eventosvivos-api
+          env:
+            - name: Swagger__Enabled
+              value: "false"
+          # Al arrancar aplica migraciones contra RDS antes de escuchar: margen de 150 s
+          startupProbe:
+            httpGet: { path: /health, port: 8080 }
+            periodSeconds: 5
+            failureThreshold: 30
+          readinessProbe:
+            httpGet: { path: /health, port: 8080 }
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /health, port: 8080 }
+            periodSeconds: 20
+          resources:
+            requests: { cpu: 100m, memory: 256Mi }
+            limits: { memory: 512Mi }
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: eventosvivos-api
+  namespace: eventosvivos
+spec:
+  selector: { app: eventosvivos-api }
+  ports:
+    - port: 80
+      targetPort: 8080
