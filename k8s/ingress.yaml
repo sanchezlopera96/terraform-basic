@@ -1,0 +1,24 @@
+# ALB :80 -> Traefik (worker) -> este Ingress.
+# SPA y API comparten dominio: el front llama a /api con rutas relativas (sin CORS).
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: eventosvivos
+  namespace: eventosvivos
+spec:
+  ingressClassName: traefik
+  rules:
+    - http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: eventosvivos-api
+                port: { number: 80 }
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: eventosvivos-web
+                port: { number: 80 }

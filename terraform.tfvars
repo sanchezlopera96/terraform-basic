@@ -15,3 +15,7 @@ eip1_vp_name       = "EIP_ITMLab_VP_NatGW_1"
 natgw1_vp_name     = "NGW_ITMLab_VP_1"
 rt_public_vp_name  = "RT_ITMLab_VP_Public"
 rt_private_vp_name = "RT_ITMLab_VP_Private"
+
+# Compute Variables
+master_instance_type = "t3.medium"
+worker_instance_type = "t3.large"
