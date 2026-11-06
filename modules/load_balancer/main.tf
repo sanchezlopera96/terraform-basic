@@ -34,5 +34,3 @@ resource "aws_lb_target_group_attachment" "worker_attach" {
   target_group_arn = aws_lb_target_group.tg.arn
   target_id        = var.worker_instance_id
 }
-
-output "alb_dns" { value = aws_lb.main.dns_name }

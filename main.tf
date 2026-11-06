@@ -27,15 +27,26 @@ module "storage" {
 
 # Subredes privadas 2 y 3 = capa DB (1a y 1d)
 module "db" {
-  source               = "./modules/db"
-  db_subnets           = slice(module.network.private_subnets, 2, 4)
-  rds_sg_id            = module.security.rds_sg_id
-  db_engine_version    = var.db_engine_version
-  db_instance_class    = var.db_instance_class
-  db_allocated_storage = var.db_allocated_storage
-  db_name              = var.db_name
-  db_username          = var.db_username
-  db_password          = var.db_password
+  source                   = "./modules/db"
+  db_subnets               = slice(module.network.private_subnets, 2, 4)
+  rds_sg_id                = module.security.rds_sg_id
+  db_engine_version        = var.db_engine_version
+  db_instance_class        = var.db_instance_class
+  db_allocated_storage     = var.db_allocated_storage
+  db_max_allocated_storage = var.db_max_allocated_storage
+  db_backup_retention_days = var.db_backup_retention_days
+  db_name                  = var.db_name
+  db_username              = var.db_username
+}
+
+# Redis en las mismas subredes DB (persistencia fuera del cluster)
+module "cache" {
+  source                        = "./modules/cache"
+  cache_subnets                 = slice(module.network.private_subnets, 2, 4)
+  cache_sg_id                   = module.security.cache_sg_id
+  cache_engine_version          = var.cache_engine_version
+  cache_node_type               = var.cache_node_type
+  cache_snapshot_retention_days = var.cache_snapshot_retention_days
 }
 
 module "compute" {
@@ -60,12 +71,3 @@ module "load_balancer" {
   worker_instance_id = module.compute.worker_id
   alb_sg_id          = module.security.alb_sg_id
 }
-
-output "master_public_ip" { value = module.compute.master_public_ip }
-output "master_private_ip" { value = module.compute.master_private_ip }
-output "worker_private_ip" { value = module.compute.worker_private_ip }
-output "alb_dns" { value = module.load_balancer.alb_dns }
-output "efs_id" { value = module.storage.efs_id }
-output "db_address" { value = module.db.db_address }
-output "db_port" { value = module.db.db_port }
-output "db_name" { value = module.db.db_name }
