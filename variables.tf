@@ -101,13 +101,25 @@ variable "db_engine_version" {
 variable "db_instance_class" {
   description = "Tipo de instancia de la base de datos"
   type        = string
-  default     = "db.t3.micro"
+  default     = "db.t4g.micro"
 }
 
 variable "db_allocated_storage" {
-  description = "Almacenamiento de la base de datos en GB"
+  description = "Almacenamiento inicial de la base de datos en GB"
   type        = number
   default     = 20
+}
+
+variable "db_max_allocated_storage" {
+  description = "Hasta cuántos GB puede crecer el almacenamiento de la base de datos"
+  type        = number
+  default     = 50
+}
+
+variable "db_backup_retention_days" {
+  description = "Días que se conservan los respaldos automáticos de la base de datos"
+  type        = number
+  default     = 1
 }
 
 variable "db_name" {
@@ -122,11 +134,23 @@ variable "db_username" {
   default     = "admin_user"
 }
 
-# Contraseña de la base (usar TF_VAR_db_password, no ponerla en .tfvars)
-variable "db_password" {
-  description = "Contraseña del usuario maestro de la base de datos"
+# Base de datos en memoria (ElastiCache Redis)
+variable "cache_engine_version" {
+  description = "Versión de Redis"
   type        = string
-  sensitive   = true
+  default     = "7.1"
+}
+
+variable "cache_node_type" {
+  description = "Tipo de nodo de ElastiCache"
+  type        = string
+  default     = "cache.t4g.micro"
+}
+
+variable "cache_snapshot_retention_days" {
+  description = "Días que se conservan los snapshots automáticos de Redis"
+  type        = number
+  default     = 1
 }
 
 # Llave SSH

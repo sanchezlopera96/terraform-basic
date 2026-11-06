@@ -45,3 +45,32 @@ output "db_name" {
   description = "Nombre de la base de datos inicial"
   value       = module.db.db_name
 }
+
+output "db_username" {
+  description = "Usuario maestro de la base de datos"
+  value       = module.db.db_username
+}
+
+output "db_password" {
+  description = "Contraseña de la base de datos (ver con: terraform output -raw db_password)"
+  value       = module.db.db_password
+  sensitive   = true
+}
+
+############### Cache (Redis) ###############
+
+output "cache_address" {
+  description = "Endpoint primario de Redis (conexión con TLS: rediss://)"
+  value       = module.cache.cache_address
+}
+
+output "cache_port" {
+  description = "Puerto de Redis"
+  value       = module.cache.cache_port
+}
+
+output "cache_auth_token" {
+  description = "Auth token de Redis (ver con: terraform output -raw cache_auth_token)"
+  value       = module.cache.cache_auth_token
+  sensitive   = true
+}

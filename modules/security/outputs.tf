@@ -18,6 +18,11 @@ output "rds_sg_id" {
   value       = aws_security_group.rds.id
 }
 
+output "cache_sg_id" {
+  description = "ID del Security Group de ElastiCache"
+  value       = aws_security_group.cache.id
+}
+
 output "alb_sg_id" {
   description = "ID del Security Group del ALB"
   value       = aws_security_group.alb.id

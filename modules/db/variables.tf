@@ -19,7 +19,17 @@ variable "db_instance_class" {
 }
 
 variable "db_allocated_storage" {
-  description = "Almacenamiento en GB"
+  description = "Almacenamiento inicial en GB"
+  type        = number
+}
+
+variable "db_max_allocated_storage" {
+  description = "Hasta cuántos GB puede crecer el almacenamiento de forma automática"
+  type        = number
+}
+
+variable "db_backup_retention_days" {
+  description = "Días que se conservan los respaldos automáticos (0 los desactiva)"
   type        = number
 }
 
@@ -31,10 +41,4 @@ variable "db_name" {
 variable "db_username" {
   description = "Usuario maestro"
   type        = string
-}
-
-variable "db_password" {
-  description = "Contraseña del usuario maestro"
-  type        = string
-  sensitive   = true
 }
