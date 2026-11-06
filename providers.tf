@@ -1,5 +1,6 @@
 terraform {
-  required_version = ">= 1.5.0"
+  # use_lockfile requiere Terraform >= 1.10
+  required_version = ">= 1.10.0"
 
   backend "s3" {
     bucket  = "ssachez.itm-lab-ps-1"
@@ -7,6 +8,8 @@ terraform {
     region  = "us-east-1"
     encrypt = true
     profile = "PPatrones"
+    # Bloqueo nativo en S3 (archivo .tflock junto al estado): evita dos apply a la vez
+    use_lockfile = true
   }
 
   required_providers {

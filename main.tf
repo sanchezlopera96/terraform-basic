@@ -60,12 +60,3 @@ module "load_balancer" {
   worker_instance_id = module.compute.worker_id
   alb_sg_id          = module.security.alb_sg_id
 }
-
-output "master_public_ip" { value = module.compute.master_public_ip }
-output "master_private_ip" { value = module.compute.master_private_ip }
-output "worker_private_ip" { value = module.compute.worker_private_ip }
-output "alb_dns" { value = module.load_balancer.alb_dns }
-output "efs_id" { value = module.storage.efs_id }
-output "db_address" { value = module.db.db_address }
-output "db_port" { value = module.db.db_port }
-output "db_name" { value = module.db.db_name }

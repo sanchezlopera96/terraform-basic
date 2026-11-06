@@ -13,5 +13,3 @@ resource "aws_efs_mount_target" "main" {
   subnet_id       = var.private_subnets[count.index]
   security_groups = [var.efs_sg_id]
 }
-
-output "efs_id" { value = aws_efs_file_system.main.id }

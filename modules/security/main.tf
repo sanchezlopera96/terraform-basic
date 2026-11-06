@@ -57,8 +57,6 @@ resource "aws_vpc_security_group_egress_rule" "master_all" {
   cidr_ipv4         = "0.0.0.0/0"
 }
 
-output "master_sg_id" { value = aws_security_group.master.id }
-
 ############### Worker ###############
 
 resource "aws_security_group" "worker" {
@@ -128,8 +126,6 @@ resource "aws_vpc_security_group_egress_rule" "worker_all" {
   cidr_ipv4         = "0.0.0.0/0"
 }
 
-output "worker_sg_id" { value = aws_security_group.worker.id }
-
 ############### EFS ###############
 
 resource "aws_security_group" "efs" {
@@ -155,8 +151,6 @@ resource "aws_vpc_security_group_ingress_rule" "efs_nfs_worker" {
   to_port                      = 2049
   referenced_security_group_id = aws_security_group.worker.id
 }
-
-output "efs_sg_id" { value = aws_security_group.efs.id }
 
 ############### RDS ###############
 
@@ -184,8 +178,6 @@ resource "aws_vpc_security_group_ingress_rule" "rds_pg_master" {
   referenced_security_group_id = aws_security_group.master.id
 }
 
-output "rds_sg_id" { value = aws_security_group.rds.id }
-
 ############### ALB ###############
 
 resource "aws_security_group" "alb" {
@@ -205,5 +197,3 @@ resource "aws_security_group" "alb" {
   }
   tags = { Name = "SG-ALB-${terraform.workspace}" }
 }
-
-output "alb_sg_id" { value = aws_security_group.alb.id }
