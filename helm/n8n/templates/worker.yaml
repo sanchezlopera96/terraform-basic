@@ -1,0 +1,46 @@
+# Workers de n8n: toman ejecuciones de la cola en Redis. Son stateless
+# (no montan el EFS); todo su estado viene de PostgreSQL y Redis.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-worker
+  labels:
+    {{- include "n8n.labels" . | nindent 4 }}
+    app.kubernetes.io/component: worker
+spec:
+  replicas: {{ .Values.worker.replicas }}
+  selector:
+    matchLabels:
+      {{- include "n8n.selector" . | nindent 6 }}
+      app.kubernetes.io/component: worker
+  template:
+    metadata:
+      annotations:
+        checksum/secret: {{ .Values.secretChecksum | quote }}
+      labels:
+        {{- include "n8n.selector" . | nindent 8 }}
+        app.kubernetes.io/component: worker
+    spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+      containers:
+        - name: n8n-worker
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args: ["worker", "--concurrency={{ .Values.worker.concurrency }}"]
+          ports:
+            - name: health
+              containerPort: 5678
+          env:
+            {{- include "n8n.env" . | nindent 12 }}
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: health
+            initialDelaySeconds: 60
+            periodSeconds: 20
+            failureThreshold: 5
+          resources:
+            {{- toYaml .Values.worker.resources | nindent 12 }}

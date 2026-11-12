@@ -14,9 +14,11 @@ module "network" {
 }
 
 module "security" {
-  source     = "./modules/security"
-  vpc_id     = module.network.vpc_id
-  admin_cidr = var.admin_cidr
+  source          = "./modules/security"
+  vpc_id          = module.network.vpc_id
+  admin_cidr      = var.admin_cidr
+  n8n_public_port = var.n8n_public_port
+  n8n_node_port   = var.n8n_node_port
 }
 
 module "storage" {
@@ -70,4 +72,16 @@ module "load_balancer" {
   public_subnets     = module.network.public_subnets
   worker_instance_id = module.compute.worker_id
   alb_sg_id          = module.security.alb_sg_id
+  n8n_public_port    = var.n8n_public_port
+  n8n_node_port      = var.n8n_node_port
+}
+
+############### n8n ###############
+
+# Clave con la que n8n cifra las credenciales que guarda en PostgreSQL. Vive en el
+# state para sobrevivir a la recreación del cluster: si cambia, n8n ya no puede
+# descifrar las credenciales guardadas.
+resource "random_password" "n8n_encryption_key" {
+  length  = 48
+  special = false
 }

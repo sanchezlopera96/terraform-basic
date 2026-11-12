@@ -83,6 +83,15 @@ resource "aws_vpc_security_group_ingress_rule" "worker_http_alb" {
   referenced_security_group_id = aws_security_group.alb.id
 }
 
+resource "aws_vpc_security_group_ingress_rule" "worker_n8n_alb" {
+  security_group_id            = aws_security_group.worker.id
+  description                  = "NodePort de n8n desde el ALB"
+  ip_protocol                  = "tcp"
+  from_port                    = var.n8n_node_port
+  to_port                      = var.n8n_node_port
+  referenced_security_group_id = aws_security_group.alb.id
+}
+
 resource "aws_vpc_security_group_ingress_rule" "worker_flannel_master" {
   security_group_id            = aws_security_group.worker.id
   description                  = "Flannel VXLAN desde el master"
@@ -226,6 +235,16 @@ resource "aws_security_group" "alb" {
     to_port     = 80
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
+  }
+  # n8n solo desde la IP del admin: en n8n la primera visita crea la cuenta de administrador.
+  # Va en línea (no como aws_vpc_security_group_ingress_rule) porque este SG ya usa reglas
+  # en línea; mezclar ambos estilos hace que Terraform borre unas u otras en cada apply.
+  ingress {
+    description = "n8n desde admin"
+    from_port   = var.n8n_public_port
+    to_port     = var.n8n_public_port
+    protocol    = "tcp"
+    cidr_blocks = [var.admin_cidr]
   }
   egress {
     from_port   = 0
