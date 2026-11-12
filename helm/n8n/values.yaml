@@ -1,0 +1,75 @@
+# Valores por defecto del chart. Los valores que dependen de la
+# infraestructura (endpoints de RDS y Redis, DNS del ALB) los completa
+# scripts/deploy-n8n.ps1 a partir de los outputs de Terraform.
+#
+# Basado en el chart del profe (Seminario-main), adaptado a este cluster:
+#   - Entrada por el ALB (listener dedicado) en vez de la IP pública del master.
+#   - EFS por el CSI driver (StorageClass efs-sc) en vez de un PV NFS estático.
+
+image:
+  repository: docker.n8n.io/n8nio/n8n
+  # Fijar una version concreta; revisar https://github.com/n8n-io/n8n/releases
+  tag: "2.20.9"
+  pullPolicy: IfNotPresent
+
+# Secret (creado por scripts/deploy-n8n.ps1) con las claves:
+# DB_POSTGRESDB_PASSWORD, QUEUE_BULL_REDIS_PASSWORD y N8N_ENCRYPTION_KEY.
+existingSecret: n8n-secrets
+# Hash del Secret (lo calcula el script) para reiniciar PODs si cambia.
+secretChecksum: ""
+
+timezone: America/Bogota
+
+# URL pública: http://<publicHost>:<publicPort>/
+#   publicHost = DNS del ALB (output alb_dns)
+#   publicPort = listener del ALB para n8n (variable n8n_public_port de Terraform)
+publicHost: ""
+publicPort: 5678
+
+# El ALB envía el tráfico de publicPort a este NodePort del worker
+# (debe coincidir con la variable n8n_node_port de Terraform).
+service:
+  type: NodePort
+  port: 5678
+  nodePort: 30678
+
+# ---------------------------------------------------------------------------
+# EFS por el CSI driver: el PVC crea un access point propio en el EFS
+# (StorageClass efs-sc, definida en el user data del master). El access point
+# fija el usuario dueño de los archivos, por eso no hace falta chown.
+# ---------------------------------------------------------------------------
+persistence:
+  storageClass: efs-sc
+  size: 5Gi
+
+postgres:
+  host: ""
+  port: 5432
+  database: n8n
+  user: admin_user
+  # RDS exige SSL (rds.force_ssl=1); no se valida la CA de Amazon.
+  ssl: true
+  sslRejectUnauthorized: false
+
+redis:
+  host: ""
+  port: 6379
+  tls: true
+
+main:
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      memory: 1Gi
+
+worker:
+  replicas: 1
+  concurrency: 10
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      memory: 1Gi

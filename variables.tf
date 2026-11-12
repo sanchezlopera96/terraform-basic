@@ -122,10 +122,11 @@ variable "db_backup_retention_days" {
   default     = 1
 }
 
+# Base inicial para n8n. eventosvivos crea su propia base al arrancar (migraciones EF Core)
 variable "db_name" {
   description = "Nombre de la base de datos inicial"
   type        = string
-  default     = "eventosvivos"
+  default     = "n8n"
 }
 
 variable "db_username" {
@@ -151,6 +152,19 @@ variable "cache_snapshot_retention_days" {
   description = "Días que se conservan los snapshots automáticos de Redis"
   type        = number
   default     = 1
+}
+
+# n8n: ALB :n8n_public_port -> worker :n8n_node_port (Service NodePort del chart helm/n8n)
+variable "n8n_public_port" {
+  description = "Puerto del ALB por el que se publica n8n (solo accesible desde admin_cidr)"
+  type        = number
+  default     = 5678
+}
+
+variable "n8n_node_port" {
+  description = "NodePort del Service de n8n en el worker (debe coincidir con service.nodePort del chart)"
+  type        = number
+  default     = 30678
 }
 
 # Llave SSH

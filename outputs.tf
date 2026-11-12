@@ -22,6 +22,19 @@ output "alb_dns" {
   value       = module.load_balancer.alb_dns
 }
 
+############### n8n ###############
+
+output "n8n_url" {
+  description = "URL de n8n (solo accesible desde admin_cidr)"
+  value       = module.load_balancer.n8n_url
+}
+
+output "n8n_encryption_key" {
+  description = "N8N_ENCRYPTION_KEY (ver con: terraform output -raw n8n_encryption_key)"
+  value       = random_password.n8n_encryption_key.result
+  sensitive   = true
+}
+
 ############### Storage ###############
 
 output "efs_id" {

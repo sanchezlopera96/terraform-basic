@@ -1,0 +1,96 @@
+# Proceso principal de n8n (editor, API, webhooks y scheduler). Debe haber
+# una sola replica: si el POD muere, el Deployment crea otro que vuelve a
+# leer los workflows desde PostgreSQL y /home/node/.n8n desde el EFS.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-main
+  labels:
+    {{- include "n8n.labels" . | nindent 4 }}
+    app.kubernetes.io/component: main
+spec:
+  replicas: 1
+  # Recreate evita dos procesos main simultaneos durante un rollout.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      {{- include "n8n.selector" . | nindent 6 }}
+      app.kubernetes.io/component: main
+  template:
+    metadata:
+      annotations:
+        checksum/secret: {{ .Values.secretChecksum | quote }}
+      labels:
+        {{- include "n8n.selector" . | nindent 8 }}
+        app.kubernetes.io/component: main
+    spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+      # Sin initContainer de chown: el access point del EFS (CSI) ya define
+      # el dueño y los permisos del directorio.
+      containers:
+        - name: n8n
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 5678
+          env:
+            {{- include "n8n.env" . | nindent 12 }}
+            - name: N8N_PORT
+              value: "5678"
+            - name: N8N_PROTOCOL
+              value: http
+            - name: N8N_HOST
+              value: {{ .Values.publicHost | quote }}
+            - name: N8N_EDITOR_BASE_URL
+              value: {{ include "n8n.baseUrl" . | quote }}
+            - name: WEBHOOK_URL
+              value: {{ include "n8n.baseUrl" . | quote }}
+            # Acceso por HTTP plano (ALB sin certificado) en el laboratorio.
+            - name: N8N_SECURE_COOKIE
+              value: "false"
+          volumeMounts:
+            - name: data
+              mountPath: /home/node/.n8n
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 20
+            failureThreshold: 5
+          resources:
+            {{- toYaml .Values.main.resources | nindent 12 }}
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    {{- include "n8n.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  selector:
+    {{- include "n8n.selector" . | nindent 4 }}
+    app.kubernetes.io/component: main
+  ports:
+    - name: http
+      port: {{ .Values.service.port }}
+      targetPort: http
+      {{- if eq .Values.service.type "NodePort" }}
+      nodePort: {{ .Values.service.nodePort }}
+      {{- end }}

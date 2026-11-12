@@ -1,0 +1,21 @@
+# PVC sobre el EFS por el CSI driver (StorageClass efs-sc): el driver crea un
+# access point propio y el PV automáticamente, con acceso desde cualquier nodo
+# (ReadWriteMany), así que el POD puede reprogramarse y recupera los datos.
+#
+# resource-policy keep: un `helm uninstall` no borra el PVC; si se borrara el
+# PVC, efs-sc (reclaimPolicy Delete) sí borraría su access point y los datos.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Release.Name }}-data
+  labels:
+    {{- include "n8n.labels" . | nindent 4 }}
+  annotations:
+    helm.sh/resource-policy: keep
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: {{ .Values.persistence.storageClass | quote }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.size }}

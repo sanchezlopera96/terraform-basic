@@ -1,0 +1,6 @@
+apiVersion: v2
+name: n8n
+description: n8n en modo queue sobre K3s, con datos en EFS, PostgreSQL (RDS) y Redis (ElastiCache).
+type: application
+version: 0.1.0
+appVersion: "2.20.9"
