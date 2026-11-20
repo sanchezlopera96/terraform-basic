@@ -64,6 +64,9 @@ main:
     limits:
       memory: 1Gi
 
+# Imagen del initContainer del worker que espera a que el main esté listo
+waitImage: busybox:1.36
+
 worker:
   replicas: 1
   concurrency: 10

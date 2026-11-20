@@ -51,6 +51,10 @@ guardadas en PostgreSQL dejan de poder descifrarse.
   value: {{ .Values.postgres.sslRejectUnauthorized | quote }}
 - name: EXECUTIONS_MODE
   value: queue
+# Las ejecuciones manuales (botón "Execute workflow") también van a los workers,
+# no al main. Quita el aviso de deprecación: será el único modo en n8n 3.
+- name: OFFLOAD_MANUAL_EXECUTIONS_TO_WORKERS
+  value: "true"
 - name: QUEUE_BULL_REDIS_HOST
   value: {{ required "redis.host es obligatorio" .Values.redis.host | quote }}
 - name: QUEUE_BULL_REDIS_PORT
