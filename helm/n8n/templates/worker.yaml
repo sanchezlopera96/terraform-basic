@@ -25,6 +25,19 @@ spec:
         runAsUser: 1000
         runAsGroup: 1000
         runAsNonRoot: true
+      # Espera a que el main esté listo antes de arrancar. Main y worker corren las
+      # migraciones de la base al iniciar; si arrancan a la vez sobre una base vacía
+      # chocan ("relation ... already exists") y el main se reinicia. El Service solo
+      # responde cuando el main pasó su readinessProbe, es decir, con las migraciones hechas.
+      initContainers:
+        - name: wait-for-main
+          image: {{ .Values.waitImage | quote }}
+          command:
+            - sh
+            - -c
+            - >-
+              until wget -q -O /dev/null http://{{ .Release.Name }}:{{ .Values.service.port }}/healthz;
+              do echo "esperando a {{ .Release.Name }}-main..."; sleep 5; done
       containers:
         - name: n8n-worker
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
