@@ -1,0 +1,221 @@
+{
+  "name": "Auditoria Inventario Excel",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## API de auditoria de inventario (Excel)\nIgual que la API JSON, pero los datos llegan en dos archivos Excel.\n\n**POST /webhook/auditoria-excel** (multipart/form-data) con dos archivos:\n- campo `bodegaA`: Excel de la bodega fuente de verdad\n- campo `bodegaB`: Excel de la bodega a revisar\n\nCada Excel con columnas: `product_id`, `name`, `stock` (fila 1 = encabezados).\nCliente: `scripts/auditoria-excel.ps1` (envia `datos/bodegaA` y `datos/bodegaB`).",
+        "height": 320,
+        "width": 440
+      },
+      "id": "5a1c9e2f-3b4d-4e6f-8a7b-9c0d1e2f3a4b",
+      "name": "Nota",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-60, -380]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "auditoria-excel",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "6b2d0f3a-4c5e-4f70-9b8c-0d1e2f3a4b5c",
+      "name": "Webhook Excel",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 100],
+      "webhookId": "7c3e1a4b-5d6f-4081-8c9d-1e2f3a4b5c6d"
+    },
+    {
+      "parameters": {
+        "operation": "xlsx",
+        "binaryPropertyName": "bodegaA",
+        "options": {}
+      },
+      "id": "8d4f2b5c-6e70-4192-9dae-2f3a4b5c6d7e",
+      "name": "Excel Bodega A",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [240, 0]
+    },
+    {
+      "parameters": {
+        "operation": "xlsx",
+        "binaryPropertyName": "bodegaB",
+        "options": {}
+      },
+      "id": "9e5a3c6d-7f81-42a3-8ebf-3a4b5c6d7e8f",
+      "name": "Excel Bodega B",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [240, 200]
+    },
+    {
+      "parameters": {
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "product_id",
+              "field2": "product_id"
+            }
+          ]
+        },
+        "resolve": "preferInput1",
+        "options": {}
+      },
+      "id": "a06b4d7e-8092-43b4-9fc0-4b5c6d7e8f90",
+      "name": "Auditor",
+      "type": "n8n-nodes-base.compareDatasets",
+      "typeVersion": 2.3,
+      "position": [500, 100]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b17c5e8f-90a3-44c5-a0d1-5c6d7e8f9001",
+              "name": "accion",
+              "value": "crear en B",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "c28d6f90-a1b4-45d6-b1e2-6d7e8f900112",
+      "name": "Crear en B",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [760, -140]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d39e70a1-b2c5-46e7-82f3-7e8f90011223",
+              "name": "accion",
+              "value": "sin cambios",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "e4af81b2-c3d6-47f8-9304-8f9001122334",
+      "name": "Sin cambios",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [760, 20]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f5b092c3-d4e7-4809-a415-900112233445",
+              "name": "accion",
+              "value": "actualizar en B",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "06c1a3d4-e5f8-491a-b526-011223344556",
+      "name": "Actualizar en B",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [760, 180]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "17d2b4e5-f609-4a2b-8637-122334455667",
+              "name": "accion",
+              "value": "eliminar de B",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "28e3c5f6-071a-4b3c-9748-233445566778",
+      "name": "Eliminar de B",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [760, 340]
+    },
+    {
+      "parameters": {
+        "numberInputs": 4
+      },
+      "id": "39f4d607-182b-4c4d-a859-344556677889",
+      "name": "Reporte",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [1020, 100]
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "id": "4a05e718-293c-4d5e-b96a-45566778899a",
+      "name": "Responder",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1260, 100]
+    }
+  ],
+  "connections": {
+    "Webhook Excel": {
+      "main": [
+        [
+          { "node": "Excel Bodega A", "type": "main", "index": 0 },
+          { "node": "Excel Bodega B", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Excel Bodega A": {
+      "main": [[{ "node": "Auditor", "type": "main", "index": 0 }]]
+    },
+    "Excel Bodega B": {
+      "main": [[{ "node": "Auditor", "type": "main", "index": 1 }]]
+    },
+    "Auditor": {
+      "main": [
+        [{ "node": "Crear en B", "type": "main", "index": 0 }],
+        [{ "node": "Sin cambios", "type": "main", "index": 0 }],
+        [{ "node": "Actualizar en B", "type": "main", "index": 0 }],
+        [{ "node": "Eliminar de B", "type": "main", "index": 0 }]
+      ]
+    },
+    "Crear en B": {
+      "main": [[{ "node": "Reporte", "type": "main", "index": 0 }]]
+    },
+    "Sin cambios": {
+      "main": [[{ "node": "Reporte", "type": "main", "index": 1 }]]
+    },
+    "Actualizar en B": {
+      "main": [[{ "node": "Reporte", "type": "main", "index": 2 }]]
+    },
+    "Eliminar de B": {
+      "main": [[{ "node": "Reporte", "type": "main", "index": 3 }]]
+    },
+    "Reporte": {
+      "main": [[{ "node": "Responder", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

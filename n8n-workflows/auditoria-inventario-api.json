@@ -1,0 +1,219 @@
+{
+  "name": "Auditoria Inventario API",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## API de auditoria de inventario\nBasado en la plantilla 5999 de n8n (Warehouse Inventory Audit).\n\n**POST /webhook/auditoria** con el body:\n```\n{ \"bodegaA\": [ {product_id, name, stock} ],\n  \"bodegaB\": [ {product_id, name, stock} ] }\n```\nbodegaA es la fuente de verdad. Responde cada producto con su `accion`: crear en B, sin cambios, actualizar en B o eliminar de B.",
+        "height": 300,
+        "width": 420
+      },
+      "id": "88011db9-1f88-425b-94ab-88ee282030b0",
+      "name": "Nota",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-60, -340]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "auditoria",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "2cb503aa-1a79-4247-9ace-723ec54d3525",
+      "name": "Webhook Auditoria",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 100],
+      "webhookId": "1b281b49-c01a-4417-bac2-62c3e111efec"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "body.bodegaA",
+        "options": {}
+      },
+      "id": "db95cb59-5869-4fd0-b524-01a58bd40877",
+      "name": "Productos Bodega A",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [240, 0]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "body.bodegaB",
+        "options": {}
+      },
+      "id": "26629072-5efa-4823-95c6-47089f5d60f6",
+      "name": "Productos Bodega B",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [240, 200]
+    },
+    {
+      "parameters": {
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "product_id",
+              "field2": "product_id"
+            }
+          ]
+        },
+        "resolve": "preferInput1",
+        "options": {}
+      },
+      "id": "0c932a53-c915-4b14-a962-9ef2d74fb92a",
+      "name": "Auditor",
+      "type": "n8n-nodes-base.compareDatasets",
+      "typeVersion": 2.3,
+      "position": [500, 100]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "10fa91b6-02d0-4420-9433-8acf034f5491",
+              "name": "accion",
+              "value": "crear en B",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "ae605fa4-11d0-4394-a3a6-f726e4fb36ca",
+      "name": "Crear en B",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [760, -140]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "53b64498-903f-4c55-b962-920e10a7e9cc",
+              "name": "accion",
+              "value": "sin cambios",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "705304a1-580f-4740-8975-20c50acd3059",
+      "name": "Sin cambios",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [760, 20]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0c0dad86-cda5-49ab-87ad-c86ca4a00562",
+              "name": "accion",
+              "value": "actualizar en B",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "ca3a7f35-d11f-4713-a824-0c1a6c833d13",
+      "name": "Actualizar en B",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [760, 180]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c6e3a1f2-5b7d-4e8a-9f01-2a3b4c5d6e7f",
+              "name": "accion",
+              "value": "eliminar de B",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "d4f5a6b7-c8d9-4e0f-a1b2-c3d4e5f6a7b8",
+      "name": "Eliminar de B",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [760, 340]
+    },
+    {
+      "parameters": {
+        "numberInputs": 4
+      },
+      "id": "e1f2a3b4-c5d6-4e7f-8a9b-0c1d2e3f4a5b",
+      "name": "Reporte",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [1020, 100]
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "id": "f6a7b8c9-d0e1-4f2a-b3c4-d5e6f7a8b9c0",
+      "name": "Responder",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1260, 100]
+    }
+  ],
+  "connections": {
+    "Webhook Auditoria": {
+      "main": [
+        [
+          { "node": "Productos Bodega A", "type": "main", "index": 0 },
+          { "node": "Productos Bodega B", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Productos Bodega A": {
+      "main": [[{ "node": "Auditor", "type": "main", "index": 0 }]]
+    },
+    "Productos Bodega B": {
+      "main": [[{ "node": "Auditor", "type": "main", "index": 1 }]]
+    },
+    "Auditor": {
+      "main": [
+        [{ "node": "Crear en B", "type": "main", "index": 0 }],
+        [{ "node": "Sin cambios", "type": "main", "index": 0 }],
+        [{ "node": "Actualizar en B", "type": "main", "index": 0 }],
+        [{ "node": "Eliminar de B", "type": "main", "index": 0 }]
+      ]
+    },
+    "Crear en B": {
+      "main": [[{ "node": "Reporte", "type": "main", "index": 0 }]]
+    },
+    "Sin cambios": {
+      "main": [[{ "node": "Reporte", "type": "main", "index": 1 }]]
+    },
+    "Actualizar en B": {
+      "main": [[{ "node": "Reporte", "type": "main", "index": 2 }]]
+    },
+    "Eliminar de B": {
+      "main": [[{ "node": "Reporte", "type": "main", "index": 3 }]]
+    },
+    "Reporte": {
+      "main": [[{ "node": "Responder", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
